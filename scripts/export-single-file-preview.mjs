@@ -184,6 +184,10 @@ function loadPage(relativePath) {
 
 function makeStandalonePage(relativePath, options = {}) {
   let html = loadPage(relativePath);
+  // La URL canónica y og:url describen la web publicada; no corresponden
+  // a una copia file:// y el enlace canonical sería una referencia externa.
+  html = html.replace(/<link\b(?=[^>]*\brel=["']canonical["'])[^>]*>/gi, "");
+  html = html.replace(/<meta\b(?=[^>]*\bproperty=["']og:url["'])[^>]*>/gi, "");
   html = inlineStyles(html);
   html = inlineScripts(html);
   const embedded = inlineElementResources(html, relativePath);
