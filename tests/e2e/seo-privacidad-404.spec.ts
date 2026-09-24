@@ -32,7 +32,10 @@ test.describe("PA-10 · SEO por perfil technical", () => {
     // OpenGraph propio + favicon local + lang.
     expect(await page.locator('meta[property="og:title"]').getAttribute("content")).toBeTruthy();
     expect(await page.locator('meta[property="og:locale"][content="es_CO"]').count()).toBe(1);
-    expect(await page.locator('link[rel="icon"][href="/favicon.svg"]').count()).toBe(1);
+    expect(await page.locator('link[rel="icon"][href="/favicon.svg?v=2"]').count()).toBe(1);
+    const favicon = await page.request.get("/favicon.svg?v=2");
+    expect(favicon.status()).toBe(200);
+    expect(favicon.headers()["content-type"]).toContain("image/svg+xml");
     expect(await page.locator("html").getAttribute("lang")).toBe("es-co");
   });
 
