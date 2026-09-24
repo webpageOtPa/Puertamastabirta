@@ -1,0 +1,100 @@
+---
+// Ventajas.astro — Tres tarjetas compactas con iconos técnicos locales.
+// ---------------------------------------------------------------------
+// DISENO.md: tres bloques compactos, iconos técnicos locales y títulos
+// breves; NO inventar cifras para llenar diseño. Copy propuesto de PA-06
+// (sin claims absolutos). Los iconos son decorativos: se sirven con
+// <img alt=""> y su <title>/aria-label> vive en el SVG para el caso de
+// uso en línea. En móvil las tarjetas se apilan en una columna.
+
+export interface Item {
+  titulo: string;
+  cuerpo: string;
+  /** Slug del icono en /icons. */
+  icono: "grid" | "scale" | "compass";
+}
+
+export interface Props {
+  titulo: string;
+  items: Item[];
+}
+
+const { titulo, items } = Astro.props as Props;
+---
+
+<section class="section section--surface" id="ventajas" aria-labelledby="ventajas-titulo">
+  <div class="container">
+    <header class="ventajas__header">
+      <p class="eyebrow">Servicios</p>
+      <h2 id="ventajas-titulo">{titulo}</h2>
+    </header>
+
+    <ul role="list" class="ventajas__grid">
+      {
+        items.map((it) => (
+          <li class="ventaja">
+            <span class="ventaja__icono" aria-hidden="true">
+              <img src={`/icons/${it.icono}.svg`} alt="" width="48" height="48" />
+            </span>
+            <h3 class="ventaja__titulo">{it.titulo}</h3>
+            <p class="ventaja__cuerpo">{it.cuerpo}</p>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</section>
+
+<style>
+  .ventajas__header {
+    margin-bottom: var(--space-7);
+    max-width: 60ch;
+  }
+
+  .ventajas__header h2 {
+    margin-top: var(--space-2);
+  }
+
+  .ventajas__grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--space-5);
+  }
+
+  .ventaja {
+    background-color: var(--color-background);
+    border-radius: var(--radius-card);
+    padding: var(--space-6);
+    box-shadow: var(--shadow-card);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+  }
+
+  .ventaja__icono {
+    display: inline-flex;
+    width: 48px;
+    height: 48px;
+    color: var(--color-ink);
+  }
+
+  .ventaja__icono img {
+    width: 48px;
+    height: 48px;
+  }
+
+  .ventaja__titulo {
+    font-size: 1.125rem;
+  }
+
+  .ventaja__cuerpo {
+    color: var(--color-muted);
+    margin: 0;
+  }
+
+  @media (max-width: 768px) {
+    .ventajas__grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

@@ -1,0 +1,342 @@
+---
+// Comparativa.astro — Tabla semántica con caption (PA-04, refinada PA-07).
+// ---------------------------------------------------------------------
+// DISENO.md: tabla semántica con caption y cabeceras; columna propia
+// destacada suavemente. Reflow o scroll interno identificado.
+//
+// Decisión de implementación: texto descriptivo como <p> fuera del scroll
+// (legible en móvil sin desplazar) + <caption> corta asociada a la tabla
+// con `aria-describedby` al párrafo. `<thead>` con `scope`, `<tbody>` con
+// celdas propias destacadas con fondo lavanda.
+//
+// PA-04.G (petición del propietario): en móvil (≤768px) la tabla con
+// scroll horizontal se veía torcida/desproporcionada, así que se oculta
+// y se muestra un layout de tarjetas apiladas (una por criterio, con una
+// fila por columna y la de Puerta Abierta destacada). En desktop la tabla
+// se mantiene exactamente igual. Sin JS: ambas variantes están en el DOM
+// y CSS decide cuál se muestra.
+//
+// Refinos PA-07:
+//   - Tabla desktop: `scope="col"` en cabeceras y `scope="row"` en la
+//     primera celda de cada fila. No se usa `headers`/`id`: la tabla es
+//     simple (una cabecera de columna + una de fila por celda) y `scope`
+//     basta según ACCESIBILIDAD.md ("caption/th/scope").
+//   - Tarjetas móvil: <ul> con role="list" explícito (restaurado tras
+//     revisión: ambas listas usan list-style:none y sin el role
+//     Safari/VoiceOver puede perder la semántica de lista). Cada
+//     tarjeta conserva el criterio como
+//     <h3> y UNA fila por columna EN EL MISMO ORDEN que la tabla, con
+//     `data-marca` igual a la columna de origen: la relación
+//     fila→marcas se verifica por orden + etiqueta + atributo.
+//   - Sin desborde de página: la tabla vive dentro de
+//     `.comparativa__scroll` (overflow-x:auto, max-width:100%); en móvil
+//     ese contenedor se oculta (display:none, fuera de AT y de tab) y las
+//     tarjetas usan grid de una columna sin anchos mínimos.
+
+export interface Columna {
+  /** Etiqueta visible de la columna. */
+  label: string;
+  /** Marca a la que pertenece esta columna. */
+  marca: "puerta-abierta" | "intermediario-tradicional" | "publicacion-directa";
+}
+
+export interface Fila {
+  criterio: string;
+  valores: string[]; // mismo orden que `columnas`
+}
+
+export interface Props {
+  titulo: string;
+  /** Texto descriptivo largo: se muestra como párrafo introductorio fuera del scroll. */
+  caption: string;
+  /** Resumen corto asociado a la tabla mediante <caption>. */
+  captionShort?: string;
+  columnas: Columna[];
+  filas: Fila[];
+}
+
+const {
+  titulo,
+  caption,
+  captionShort = "Comparativa indicativa de formas de presencia",
+  columnas,
+  filas,
+} = Astro.props as Props;
+
+function colClass(c: Columna["marca"]): string {
+  if (c === "puerta-abierta") return "comparativa__celda--propia";
+  return "";
+}
+---
+
+<section class="section section--lavender" id="comparativa" aria-labelledby="comparativa-titulo">
+  <div class="container">
+    <header class="comparativa__header">
+      <p class="eyebrow">Comparativa</p>
+      <h2 id="comparativa-titulo">{titulo}</h2>
+    </header>
+
+    <p class="comparativa__lead" id="comparativa-desc">{caption}</p>
+
+    <div
+      class="comparativa__scroll"
+      role="region"
+      aria-label="Tabla comparativa con scroll horizontal en móvil"
+      tabindex="0"
+    >
+      <table class="comparativa" aria-describedby="comparativa-desc">
+        <caption class="comparativa__caption">{captionShort}</caption>
+        <thead>
+          <tr>
+            <th scope="col" class="comparativa__col-criterio">Criterio</th>
+            {
+              columnas.map((c) => (
+                <th scope="col" class={`comparativa__col ${colClass(c.marca)}`}>
+                  <span class="comparativa__col-label">{c.label}</span>
+                  {c.marca === "puerta-abierta" && (
+                    <span class="comparativa__col-tag" aria-label="Columna de Puerta Abierta">
+                      esta web
+                    </span>
+                  )}
+                </th>
+              ))
+            }
+          </tr>
+        </thead>
+        <tbody>
+          {
+            filas.map((f) => (
+              <tr>
+                <th scope="row" class="comparativa__rowhead">
+                  {f.criterio}
+                </th>
+                {f.valores.map((v, i) => {
+                  const c = columnas[i];
+                  return (
+                    <td
+                      class={`comparativa__celda ${colClass(c?.marca ?? "intermediario-tradicional")}`}
+                    >
+                      {v}
+                    </td>
+                  );
+                })}
+              </tr>
+            ))
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <!--
+      Variante móvil (PA-04.G): tarjetas apiladas, una por criterio.
+      Sólo visible en ≤768px (en desktop se oculta con CSS). Cada
+      tarjeta lleva el criterio como título y una fila por columna
+      (etiqueta de marca + valor); la fila de Puerta Abierta se
+      destaca y conserva el pill "esta web".
+    -->
+    <ul class="comparativa__cards" role="list">
+      {
+        filas.map((f) => (
+          <li class="comparativa__card" data-criterio={f.criterio}>
+            <h3 class="comparativa__card-title">{f.criterio}</h3>
+            <ul class="comparativa__card-rows" role="list">
+              {f.valores.map((v, i) => {
+                const c = columnas[i];
+                const propia = c?.marca === "puerta-abierta";
+                return (
+                  <li
+                    class={`comparativa__card-row${propia ? " comparativa__card-row--propia" : ""}`}
+                    data-marca={c?.marca}
+                  >
+                    <span class="comparativa__card-label">
+                      {c?.label}
+                      {propia && <span class="comparativa__col-tag">esta web</span>}
+                    </span>
+                    <span class="comparativa__card-value">{v}</span>
+                  </li>
+                );
+              })}
+            </ul>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</section>
+
+<style>
+  .comparativa__header {
+    margin-bottom: var(--space-6);
+    max-width: 60ch;
+  }
+
+  .comparativa__header h2 {
+    margin-top: var(--space-2);
+  }
+
+  /* Texto descriptivo fuera del scroll: legible en móvil sin desplazar.
+     La tabla conserva su <caption> corta asociada + aria-describedby. */
+  .comparativa__lead {
+    max-width: 65ch;
+    margin-top: 0;
+    margin-bottom: var(--space-4);
+    color: var(--color-muted);
+    font-size: var(--fs-small);
+  }
+
+  .comparativa__scroll {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    max-width: 100%;
+    background-color: var(--color-background);
+    border-radius: var(--radius-card);
+    box-shadow: var(--shadow-card);
+    /* Al recibir foco por teclado el navegador puede desplazar la
+       región a la vista; este margen evita que quede pegada al
+       borde superior o bajo una futura cabecera. */
+    scroll-margin-top: var(--space-4);
+  }
+
+  /* Foco visible al contenedor con scroll interno (PA-Q015).
+     Outline real (no solo box-shadow) para que sea perceptible
+     con alto contraste y sin tapar la cabecera de la tabla. */
+  .comparativa__scroll:focus-visible {
+    outline: 3px solid var(--color-focus-ring);
+    outline-offset: 2px;
+    box-shadow: var(--shadow-card);
+  }
+
+  .comparativa {
+    width: 100%;
+    border-collapse: collapse;
+    /* Ancho mínimo que fuerza el scroll horizontal nativo en
+       viewports estrechos (390/320px) sin cortar contenido. */
+    min-width: 40rem; /* 640px */
+  }
+
+  .comparativa__caption {
+    caption-side: top;
+    text-align: left;
+    padding: var(--space-4) var(--space-5);
+    color: var(--color-muted);
+    font-size: var(--fs-small);
+  }
+
+  .comparativa th,
+  .comparativa td {
+    text-align: left;
+    padding: var(--space-4) var(--space-5);
+    border-bottom: 1px solid var(--color-border);
+    vertical-align: top;
+  }
+
+  .comparativa thead th {
+    font-family: var(--font-display);
+    font-weight: var(--weight-display);
+    color: var(--color-ink);
+    background-color: var(--color-surface);
+    border-bottom: 2px solid var(--color-ink);
+  }
+
+  .comparativa__col {
+    position: relative;
+  }
+
+  .comparativa__col-label {
+    display: block;
+  }
+
+  .comparativa__col-tag {
+    display: inline-block;
+    margin-top: var(--space-1);
+    padding: 2px 8px;
+    font-size: var(--fs-caption);
+    background-color: var(--color-action);
+    color: #ffffff;
+    border-radius: var(--radius-pill);
+  }
+
+  .comparativa__rowhead {
+    font-weight: var(--weight-body-strong);
+    color: var(--color-ink);
+    background-color: var(--color-surface);
+  }
+
+  .comparativa__celda {
+    color: var(--color-text);
+  }
+
+  .comparativa__celda--propia,
+  .comparativa__col--propia {
+    background-color: var(--color-lavender);
+  }
+
+  /* ----- Variante móvil: tarjetas apiladas (PA-04.G) ----- */
+  /* En desktop las tarjetas están ocultas: la tabla no cambia. */
+  .comparativa__cards {
+    display: none;
+  }
+
+  @media (max-width: 768px) {
+    /* La tabla con scroll horizontal se sustituye por tarjetas:
+       sin scroll torcido ni overflow de página. */
+    .comparativa__scroll {
+      display: none;
+    }
+
+    .comparativa__cards {
+      display: grid;
+      gap: var(--space-4);
+      padding: 0;
+      margin: 0;
+      list-style: none;
+    }
+
+    .comparativa__card {
+      background-color: var(--color-background);
+      border-radius: var(--radius-card);
+      box-shadow: var(--shadow-card);
+      padding: var(--space-4) var(--space-5);
+    }
+
+    .comparativa__card-title {
+      font-size: var(--fs-h3);
+      margin-bottom: var(--space-3);
+    }
+
+    .comparativa__card-rows {
+      display: grid;
+      gap: var(--space-3);
+      padding: 0;
+      margin: 0;
+      list-style: none;
+    }
+
+    .comparativa__card-row {
+      display: grid;
+      gap: var(--space-1);
+      padding: var(--space-3);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-card);
+    }
+
+    /* Fila de Puerta Abierta destacada, como la columna propia. */
+    .comparativa__card-row--propia {
+      background-color: var(--color-lavender);
+      border-color: transparent;
+    }
+
+    .comparativa__card-label {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: var(--space-2);
+      font-weight: var(--weight-body-strong);
+      color: var(--color-ink);
+    }
+
+    .comparativa__card-value {
+      color: var(--color-text);
+    }
+  }
+</style>

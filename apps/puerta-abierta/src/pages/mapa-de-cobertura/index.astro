@@ -1,0 +1,51 @@
+---
+// Página estática ampliada de cobertura. Astro la emite como
+// /mapa-de-cobertura/index.html para hosting de archivos estáticos.
+import { loadSiteConfig } from "../../config/index.js";
+import { resolveBuildProfile } from "../../lib/seo.js";
+import { HOME_CONTENT } from "../../data/home-content.js";
+import Base from "../../layouts/Base.astro";
+import Cobertura from "../../components/Cobertura.astro";
+import Header from "../../components/Header.astro";
+import Footer from "../../components/Footer.astro";
+
+const loaded = loadSiteConfig(resolveBuildProfile());
+if (!loaded.ok) {
+  throw new Error(
+    `[mapa-de-cobertura/index.astro] Configuración inválida:\n` +
+      loaded.errors.map((error) => `  - ${error}`).join("\n"),
+  );
+}
+
+const cfg = loaded.config;
+const isTechnical = cfg.profile === "technical";
+const title = `Mapa de cobertura — ${cfg.site.nombrePublico}`;
+const description =
+  "Mapa y lista agrupada de ciudades de referencia. Las posiciones aproximadas no indican oficinas ni disponibilidad de locales.";
+---
+
+<Base
+  title={title}
+  description={description}
+  lang={cfg.site.lang}
+  noindex={isTechnical}
+  techPreview={isTechnical}
+  canonical={isTechnical ? null : `${cfg.site.canonical}/mapa-de-cobertura/`}
+  ogUrl={isTechnical ? null : `${cfg.site.canonical}/mapa-de-cobertura/`}
+  siteName={cfg.site.nombrePublico}
+>
+  <Header brand={cfg.site.nombrePublico} anchorBase="/" />
+
+  <main id="main" tabindex="-1">
+    <Cobertura
+      titulo={HOME_CONTENT.cobertura.titulo}
+      intro={HOME_CONTENT.cobertura.intro}
+      grupos={cfg.groups}
+      ciudades={cfg.cities}
+      interactionEnabled={cfg.features.coverageInteraction}
+      vistaAmpliada={true}
+    />
+  </main>
+
+  <Footer marca={cfg.site.nombrePublico} profile={cfg.profile} anchorBase="/" />
+</Base>

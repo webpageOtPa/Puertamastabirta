@@ -1,0 +1,102 @@
+---
+// Base.astro — Layout raíz para todas las páginas de Puerta Abierta.
+// ---------------------------------------------------------------------
+// Sólo estructura HTML y los enlaces a CSS. NO se carga ninguna fuente
+// remota ni CDN. Los estilos viven en apps/puerta-abierta/src/styles/.
+//
+// PA-04: layout sin scripts ni sticky global propio — la cabecera
+// sticky la aplica el componente Header.astro (aprobada por el
+// propietario en PA-04.E); el `scroll-padding-top` vive en global.css.
+//
+// PA-05: el skip-link (`href="#main"`) lo resuelve cada página con su
+// `<main id="main">` (ver index.astro). El `<main>` vive en la página
+// —y no envolviendo el `<slot />` aquí— para que la cabecera y el pie
+// que componen las páginas queden FUERA del contenido principal y se
+// conserven los landmarks header/nav/main/footer con un solo `<main>`.
+//
+// PA-10: metadatos por perfil (canonical/OG/favicon). `canonical` es
+// `null` en technical y el `<link rel="canonical">` se omite (nunca
+// una URL inventada). `noindex` añade `<meta name="robots">`.
+// La señal visible `.tech-preview` ("vista previa técnica — no
+// indexada") va por flag propio `techPreview` (perfil technical),
+// DESACOPLADA de `noindex`: la 404 fuerza `noindex` en cualquier
+// perfil, pero el banner sólo aparece en technical (corrección D2
+// tras revisión: en un build commercial futuro la 404 no mostraría
+// "Vista previa técnica"). Sin prometer recepción ni resultados.
+
+import "../styles/tokens.css";
+import "../styles/fonts.css";
+import "../styles/global.css";
+import { toOgLocale } from "../lib/seo.js";
+
+export interface Props {
+  title: string;
+  description?: string;
+  lang?: string;
+  /** Cuando true, añade `<meta name="robots" content="noindex" />`. */
+  noindex?: boolean;
+  /**
+   * Cuando true, muestra el aviso visible `.tech-preview` ("vista previa
+   * técnica"). Independiente de `noindex`: la 404 es `noindex` en todos
+   * los perfiles, pero el banner sólo corresponde al perfil technical.
+   */
+  techPreview?: boolean;
+  /** URL canónica aprobada; `null`/omitido en technical (no se inventa). */
+  canonical?: string | null;
+  /** `og:url`: sólo con canonical aprobado; por defecto sigue a `canonical`. */
+  ogUrl?: string | null;
+  siteName?: string;
+}
+
+const {
+  title,
+  description = "Puerta Abierta — base técnica en revisión.",
+  lang = "es-CO",
+  noindex = false,
+  techPreview = false,
+  canonical = null,
+  ogUrl = canonical,
+  siteName = "Puerta Abierta",
+} = Astro.props as Props;
+
+// `og:locale` en formato OpenGraph (`es-CO` → `es_CO`).
+const ogLocale = toOgLocale(lang);
+---
+
+<!doctype html>
+<html lang={lang}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="generator" content="astro" />
+    <meta name="color-scheme" content="light" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    {noindex && <meta name="robots" content="noindex" />}
+    {canonical && <link rel="canonical" href={canonical} />}
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content={siteName} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:locale" content={ogLocale} />
+    {ogUrl && <meta property="og:url" content={ogUrl} />}
+    <meta name="twitter:card" content="summary" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <!--
+      CSS local: NO se enlaza ningún CDN, ni Google Fonts, ni analytics.
+      Las fuentes Manrope/Source Sans 3 se declaran en CSS con fallback
+      local hasta que el operador apruebe los WOFF2 (ver fonts.css).
+    -->
+  </head>
+  <body>
+    <a href="#main" class="skip-link">Saltar al contenido principal</a>
+    {
+      techPreview && (
+        <p class="tech-preview" role="note">
+          Vista previa técnica — no indexada. Contenido en revisión, pendiente de aprobación.
+        </p>
+      )
+    }
+    <slot />
+  </body>
+</html>

@@ -1,0 +1,120 @@
+/* tokens.css — Puerta Abierta (PA-04)                                  */
+/* -------------------------------------------------------------------- */
+/* Dirección de arte urbana propia. NO comparte paleta con OTERCO       */
+/* (crema/verde/terracota). Estos tokens son la fuente única de los    */
+/* valores cromáticos y dimensionales declarados en                    */
+/* 03_INTERFAZ/DISENO.md y en la matriz de INDEPENDENCIA_VISUAL.md.    */
+/* Los valores son heredados.                                          */
+/* -------------------------------------------------------------------- */
+
+:root {
+  /* ---- Color: paleta urbana --------------------------------------- */
+  /* Texto destacado (titulares, anclas activas, focus ring) */
+  --color-ink: #0d2c54;
+  /* Acciones sólidas (CTA primario) — texto blanco encima */
+  --color-action: #1d4ed8;
+  /* Cuerpo de texto sobre fondo blanco */
+  --color-text: #1a1a1a;
+  /* Texto secundario / metadata */
+  --color-muted: #4b5563;
+  /* Fondo principal de página */
+  --color-background: #ffffff;
+  /* Paneles de método y contacto (gris azulado muy frío) */
+  --color-surface: #f4f6f9;
+  /* Acento lavanda pálido para comparativa / highlight de columnas */
+  --color-lavender: #f0e9f5;
+
+  /* Derivados semánticos (no son "colores nuevos"; son alias para */
+  /* que el HTML no necesite reescribir el token cuando se ajuste) */
+  --color-ink-on-action: #ffffff;
+  --color-ink-on-surface: #0d2c54;
+  --color-border: rgba(13, 44, 84, 0.18);
+  --color-focus-ring: #1d4ed8;
+
+  /* Velo oscuro del hero — usable con `background: var(--hero-veil)` */
+  --hero-veil: rgba(13, 20, 33, 0.62);
+
+  /* ---- Tipografía: familias declaradas ---------------------------- */
+  /* Manrope para títulos y CTA. Source Sans 3 para cuerpo y controles. */
+  /* Las @font-face viven en fonts.css y declaran fallback local/system. */
+  --font-display: "Manrope", "Helvetica Neue", Arial, system-ui, sans-serif;
+  --font-body: "Source Sans 3", "Segoe UI", "Helvetica Neue", Arial, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+
+  /* Pesos y estilos */
+  --weight-display-strong: 700;
+  --weight-display: 600;
+  --weight-body: 400;
+  --weight-body-strong: 600;
+
+  /* ---- Escala tipográfica ---------------------------------------- */
+  /* H1 con clamp sugerido por DISENO.md. */
+  --fs-h1: clamp(2.25rem, 4.2vw, 3.75rem);
+  --fs-h2: clamp(1.75rem, 3vw, 2.5rem);
+  --fs-h3: 1.25rem;
+  --fs-body: 1.0625rem; /* 17px */
+  --fs-small: 0.875rem;
+  --fs-caption: 0.8125rem;
+
+  /* Interlineado */
+  --lh-display: 1.08;
+  --lh-heading: 1.2;
+  --lh-body: 1.6;
+
+  /* ---- Espaciado (8px base, escala 1.5x) -------------------------- */
+  --space-1: 0.25rem; /*  4 */
+  --space-2: 0.5rem; /*  8 */
+  --space-3: 0.75rem; /* 12 */
+  --space-4: 1rem; /* 16 */
+  --space-5: 1.5rem; /* 24 */
+  --space-6: 2rem; /* 32 */
+  --space-7: 3rem; /* 48 */
+  --space-8: 3.5rem; /* 56 — mínimo desktop entre secciones */
+  --space-9: 5rem; /* 80 — máximo desktop entre secciones */
+
+  /* Separaciones de bloque (rango 56–80 desktop, 32–48 móvil) */
+  --section-y-desktop: clamp(3.5rem, 6vw, 5rem);
+  --section-y-mobile: clamp(2rem, 6vw, 3rem);
+
+  /* ---- Layout ---------------------------------------------------- */
+  --container-max: 1216px; /* guía de DISENO.md */
+  --container-pad-x: clamp(1rem, 3vw, 2rem);
+  --measure-text: 65ch; /* ancho de lectura objetivo */
+
+  /* Altura aproximada de la cabecera en estado compacto (logo 40px +
+     padding vertical 2×16px + borde 1px ≈ 73px → 4.5rem redondeado).
+     Se usa para calcular `scroll-padding-top` en global.css. En móvil
+     la cabecera es más baja (≈65px) salvo con el menú desplegado;
+     el margen extra de `scroll-padding-top` cubre ambos casos. */
+  --header-height: 4.5rem;
+  /* z-index de la cabecera sticky: por encima del contenido (z auto/0)
+     pero por debajo del skip-link (z 100) y de futuros modales/focos. */
+  --z-header: 20;
+
+  /* ---- Radios ---------------------------------------------------- */
+  --radius-control: 10px; /* botón sólido urbano */
+  --radius-panel: 16px; /* panel de contacto (sin inputs) */
+  --radius-card: 8px; /* tarjeta compacta */
+  --radius-pill: 999px;
+
+  /* ---- Sombras (medias, no editoriales) --------------------------- */
+  --shadow-card: 0 1px 2px rgba(13, 20, 33, 0.06), 0 4px 12px rgba(13, 20, 33, 0.04);
+  --shadow-focus: 0 0 0 3px rgba(29, 78, 216, 0.45);
+
+  /* ---- Movimiento ------------------------------------------------- */
+  /* DISENO.md exige 120–180ms; reduced-motion se aplica en global.css */
+  --motion-fast: 120ms;
+  --motion-base: 160ms;
+  --motion-slow: 220ms;
+  --easing-standard: cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+/* Punto de ruptura único para móvil <-> desktop, según DISENO.md.    */
+/* El prototipo se prueba en 320/390/768/1440 — ver EVIDENCIA.md.    */
+@media (max-width: 768px) {
+  :root {
+    /* En móvil, el panel de contacto puede ocupar fila completa;     */
+    /* se mantiene el mismo radio para no converger con OTERCO.      */
+    --section-y-mobile: 2rem;
+  }
+}

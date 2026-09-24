@@ -1,0 +1,331 @@
+---
+// Header.astro — Cabecera compacta urbana (PA-04).
+// ---------------------------------------------------------------------
+// DISENO.md pide cabecera compacta con pocas anclas y CTA de contacto,
+// sticky "solo si no tapa foco ni destino". PA-04.E: el propietario
+// aprobó la cabecera sticky; se entrega CON sticky + `scroll-padding-top`
+// en global.css (cabecera + 1rem) para que anclas y foco no queden
+// tapados. Verificado en EVIDENCIA.md §PA-04.E.
+//
+// Móvil: cabecera compacta en una sola fila (logo + toggle + CTA corto)
+// con el menú plegable con `<details>` cerrado por defecto; al abrirlo,
+// el menú aparece debajo. Funciona sin JavaScript.
+
+export interface Props {
+  /** Nombre a mostrar a la izquierda. */
+  brand?: string;
+  /**
+   * Base antepuesta a las anclas (`""` en la portada; `"/"` en la
+   * página 404 para que `#ventajas`… resuelvan a
+   * `/#ventajas`… en vez de quedar colgadas sin destino).
+   */
+  anchorBase?: string;
+}
+
+const { brand = "Puerta Abierta", anchorBase = "" } = Astro.props as Props;
+---
+
+<header class="site-header" role="banner">
+  <div class="container site-header__inner">
+    <a href="/" class="site-header__brand" aria-label={`Ir a la portada de ${brand}`}>
+      <img
+        src="/images/logo-pa.png"
+        alt="Puerta Abierta — PA Real Estate"
+        class="site-header__logo"
+        width="115"
+        height="76"
+        decoding="async"
+      />
+    </a>
+
+    <!--
+      Pocas anclas: el menú plegable con `<details>` funciona sin JS.
+      En móvil inicia CERRADO (sin `open`): la cabecera queda en una sola
+      fila compacta (~70px). En desktop el `<nav>` se fuerza visible con
+      CSS (`display: contents` en el `<details>` + `display: block` en el
+      `<nav>`), así las anclas siguen visibles y tabulables aunque el
+      `<details>` esté cerrado (PA-04.G: el propietario pidió el header
+      móvil compacto; antes el `open` de PA-04.F lo dejaba en dos filas).
+      Sin JS, el usuario móvil abre el menú con el `<summary>`; el
+      contenido del menú sólo existe una vez en el DOM.
+
+      PA-05: mejora progresiva con un script ligero al final del
+      componente (Escape cierra, foco al primer enlace al abrir y
+      `aria-expanded`/`aria-controls` sincronizados). Sin JS todo lo
+      anterior sigue funcionando con el `<summary>` nativo.
+    -->
+    <details class="site-header__nav-details">
+      <summary
+        class="site-header__toggle"
+        aria-label="Mostrar u ocultar navegación"
+        aria-controls="navegacion-principal"
+        aria-expanded="false"
+      >
+        Menú
+      </summary>
+      <nav class="site-header__nav" id="navegacion-principal" aria-label="Navegación principal">
+        <ul role="list" class="site-header__list">
+          <li><a href={`${anchorBase}#ventajas`}>Servicios</a></li>
+          <li><a href={`${anchorBase}#metodo`}>Método</a></li>
+          <li><a href={`${anchorBase}#cobertura`}>Ubicaciones</a></li>
+        </ul>
+      </nav>
+    </details>
+
+    <a href={`${anchorBase}#contacto`} class="btn btn--primary site-header__cta"
+      ><span class="site-header__cta-full">Conversemos</span><span class="site-header__cta-short"
+        >Contactar</span
+      ></a
+    >
+  </div>
+</header>
+
+<!--
+  PA-05 — Mejora progresiva del menú móvil (sin dependencias).
+  Sin JS el `<details>/<summary>` nativo sigue abriendo y cerrando el
+  menú. Con JS se añade: cierre con Escape (con foco devuelto al toggle),
+  foco al primer enlace al abrir, `aria-expanded` sincronizado y pliegue
+  del menú al seguir un ancla en móvil. En desktop (toggle oculto por
+  CSS) el script no mueve el foco ni cierra nada: el `<nav>` se fuerza
+  visible por CSS aunque el `<details>` esté cerrado.
+-->
+<script is:inline>
+  (() => {
+    const details = document.querySelector(".site-header__nav-details");
+    if (!details) return;
+    const summary = details.querySelector("summary");
+    const nav = details.querySelector("nav");
+    if (!summary) return;
+
+    const isToggleVisible = () => getComputedStyle(summary).display !== "none";
+
+    const syncExpanded = () => {
+      summary.setAttribute("aria-expanded", details.open ? "true" : "false");
+    };
+    syncExpanded();
+
+    // Al abrir en móvil, llevar el foco al primer enlace del menú para
+    // un orden de foco lógico. Al cerrar no se roba el foco aquí: el
+    // cierre con Escape lo devuelve al toggle en su manejador, y el
+    // cierre por seguir un ancla deja el foco en el destino.
+    details.addEventListener("toggle", () => {
+      syncExpanded();
+      if (details.open && isToggleVisible()) {
+        const first = nav ? nav.querySelector("a") : null;
+        if (first instanceof HTMLElement) first.focus();
+      }
+    });
+
+    // Cerrar con Escape sólo cuando el menú está abierto en móvil.
+    document.addEventListener("keydown", (event) => {
+      if (event.key !== "Escape" || !details.open || !isToggleVisible()) return;
+      details.open = false;
+      syncExpanded();
+      if (summary instanceof HTMLElement) summary.focus();
+    });
+
+    // En móvil, al seguir un ancla del menú se pliega el `<details>`
+    // para no tapar el destino; el foco lo gestiona el navegador.
+    if (nav) {
+      nav.addEventListener("click", (event) => {
+        const target = event.target;
+        const link = target instanceof Element ? target.closest("a") : null;
+        if (!link || !details.open || !isToggleVisible()) return;
+        details.open = false;
+        syncExpanded();
+      });
+    }
+  })();
+</script>
+
+<style>
+  .site-header {
+    position: sticky;
+    top: 0;
+    /* Por encima del contenido, por debajo del skip-link (z 100) y de
+       futuros modales/focos. Fondo sólido para que el contenido no se
+       vea a través al hacer scroll; sombra sutil de separación. */
+    z-index: var(--z-header, 20);
+    background-color: var(--color-background);
+    border-bottom: 1px solid var(--color-border);
+    box-shadow: 0 1px 8px rgba(13, 20, 33, 0.06);
+  }
+
+  .site-header__inner {
+    display: flex;
+    align-items: center;
+    gap: var(--space-5);
+    padding-block: var(--space-4);
+  }
+
+  .site-header__brand {
+    display: inline-flex;
+    align-items: center;
+    text-decoration: none;
+    color: var(--color-ink);
+  }
+
+  .site-header__logo {
+    display: block;
+    height: 40px;
+    width: auto;
+    max-width: 160px;
+    object-fit: contain;
+  }
+
+  /* ----- Toggle móvil: oculto en desktop, visible en <768px ----- */
+  .site-header__toggle {
+    display: none;
+    list-style: none;
+    cursor: pointer;
+    padding: var(--space-2) var(--space-4);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-control);
+    font-family: var(--font-display);
+    font-weight: var(--weight-display);
+    color: var(--color-ink);
+    background: transparent;
+  }
+
+  /* Quitar el marker nativo en WebKit */
+  .site-header__toggle::-webkit-details-marker {
+    display: none;
+  }
+
+  .site-header__nav-details {
+    /* En desktop actúa como contenedor inline sin toggle visible */
+  }
+
+  .site-header__list {
+    display: flex;
+    gap: var(--space-5);
+    align-items: center;
+  }
+
+  .site-header__list a {
+    text-decoration: none;
+    color: var(--color-ink);
+    font-weight: var(--weight-body-strong);
+    padding: var(--space-2) var(--space-1);
+  }
+
+  .site-header__list a:hover {
+    color: var(--color-action);
+  }
+
+  .site-header__cta {
+    margin-left: auto;
+    /* En desktop, el CTA va al extremo derecho */
+  }
+
+  /* Etiqueta corta del CTA: sólo en móvil (ver media query). */
+  .site-header__cta-short {
+    display: none;
+  }
+
+  /* ----- Desktop (≥769px): nav siempre visible sin `open` ----- */
+  @media (min-width: 769px) {
+    .site-header__nav-details {
+      /* El <details> no genera caja: el <summary> (oculto) y el <nav>
+         participan directamente en el flex de la cabecera. */
+      display: contents;
+    }
+
+    .site-header__toggle {
+      display: none;
+    }
+
+    /* El <nav> debe mostrarse aunque el <details> esté cerrado.
+       El `!important` vence a la regla `details:not([open])` de la
+       hoja de estilo del agente de usuario; `content-visibility`
+       cubre los motores que ocultan el contenido con esa propiedad
+       en lugar de `display`. La regla con `::details-content` se
+       ignora sin romper nada donde el pseudo-elemento no exista. */
+    .site-header__nav {
+      display: block !important;
+      content-visibility: visible !important;
+    }
+
+    .site-header__nav-details::details-content {
+      display: contents;
+      content-visibility: visible;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .site-header__inner {
+      flex-wrap: wrap;
+      /* Una sola fila compacta con el menú cerrado: menos aire y
+         menos padding vertical que en desktop. */
+      gap: var(--space-2) var(--space-3);
+      padding-block: var(--space-2);
+    }
+
+    .site-header__brand {
+      order: 1;
+      flex-shrink: 0;
+    }
+
+    /* Cerrado: el <details> es un item en línea (sólo el toggle) y
+       la cabecera queda en una fila: logo + toggle + CTA. */
+    .site-header__nav-details {
+      order: 2;
+      margin-left: auto;
+    }
+
+    /* Abierto: el <details> ocupa toda la fila inferior y el menú
+       aparece debajo de la fila compacta (sólo al abrirlo). */
+    .site-header__nav-details[open] {
+      order: 4;
+      flex-basis: 100%;
+      margin-left: 0;
+    }
+
+    .site-header__toggle {
+      display: inline-block;
+    }
+
+    .site-header__cta {
+      order: 3;
+      margin-left: 0;
+      flex-shrink: 0;
+    }
+
+    /* En móvil el CTA muestra la etiqueta corta para que quepa en
+       la misma fila que el logo y el toggle (`display: none` lo
+       oculta también de la accesibilidad: el nombre accesible pasa
+       a ser "Contactar" y sigue apuntando a #contacto). */
+    .site-header__cta-full {
+      display: none;
+    }
+
+    .site-header__cta-short {
+      display: inline;
+    }
+
+    .site-header__nav {
+      padding-block: var(--space-3);
+    }
+
+    .site-header__list {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: var(--space-3);
+    }
+
+    .site-header__cta {
+      padding: var(--space-2) var(--space-3);
+      font-size: 0.9rem;
+      /* PA-12: objetivo táctil ≥44px (ACCESIBILIDAD.md). Con la tipografía
+         reducida de móvil el alto natural queda en ~35px; `min-height`
+         lo eleva sin cambiar el ritmo horizontal (el `.btn` ya centra
+         con inline-flex). */
+      min-height: 44px;
+    }
+
+    .site-header__logo {
+      height: 28px;
+      max-width: 120px;
+    }
+  }
+</style>

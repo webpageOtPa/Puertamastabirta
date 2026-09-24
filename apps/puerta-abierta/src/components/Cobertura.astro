@@ -1,0 +1,482 @@
+---
+// Cobertura.astro — Lista de 4 grupos + mapa geográfico local (PA-04, PA-08, PA-17D).
+// ---------------------------------------------------------------------
+// DISENO.md: SVG local + lista de cuatro grupos; sin Google Maps ni
+// marcadores de oficinas inexistentes. La lista textual es la fuente de
+// verdad; el SVG es un mapa geográfico simplificado de Colombia
+// (contorno continental Natural Earth 1:50m, dominio público, + 13
+// posiciones aproximadas por Mercator en build, ver
+// src/data/colombia-geo.ts y public/coverage-map.svg).
+//
+// PA-08:
+//   - Cada ciudad se publica con `id="cobertura-ciudad-<slug>"` único y
+//     `data-city-id` + `data-group-id` + `data-group-label`: la lista es
+//     la alternativa funcional completa cuando la interacción no está
+//     disponible (sin JS o con el flag deshabilitado).
+//   - El diagrama se publica INLINE (réplica sincronizada de
+//     public/coverage-map.svg, misma correspondencia punto→ciudad vía
+//     `data-city-id`) en lugar de `<img>`: permite resaltar puntos sin
+//     fetch del SVG. En portada se oculta a tecnologías asistivas para
+//     no duplicar la lista; en la vista ampliada los marcadores se
+//     convierten en controles accesibles sólo al iniciar el script.
+//   - `interactionEnabled` (flag `coverageInteraction` de build): con
+//     `true` publica el `<select>`, los botones progresivos de lista y el
+//     tag diferido a `/coverage-interaction.js`; el selector aparece al
+//     iniciar el script. Con `false` no se publican controles ni JS
+//     exclusivo del módulo en `dist` (PA-Q019). Sin formulario, querystring
+//     ni envío a terceros.
+
+import type { CoverageCity, CoverageGroup } from "../contracts/index.ts";
+import {
+  COLOMBIA_CITY_POINTS,
+  COLOMBIA_MAP_LABELS,
+  COLOMBIA_OUTLINE_PATH,
+  COLOMBIA_VIEWBOX,
+  COLOMBIA_ZONE_WASHES,
+} from "../data/colombia-geo.ts";
+
+export interface Props {
+  titulo: string;
+  intro?: string;
+  grupos: CoverageGroup[];
+  ciudades: CoverageCity[];
+  /** Flag de build `coverageInteraction`. `false` = sólo lista + SVG. */
+  interactionEnabled?: boolean;
+  /** Presenta mapa grande, marcadores accesibles con JS y regreso a portada. */
+  vistaAmpliada?: boolean;
+}
+
+const {
+  titulo,
+  intro,
+  grupos,
+  ciudades,
+  interactionEnabled = false,
+  vistaAmpliada = false,
+} = Astro.props as Props;
+
+function ciudadesDe(g: CoverageGroup): CoverageCity[] {
+  return g.cities
+    .map((id) => ciudades.find((c) => c.id === id))
+    .filter((c): c is CoverageCity => c !== undefined);
+}
+
+const STATUS_INICIAL = "Elige una ciudad del selector o de la lista para resaltarla.";
+const SectionTitle = vistaAmpliada ? "h1" : "h2";
+---
+
+<section
+  class="section"
+  id="cobertura"
+  aria-labelledby="cobertura-titulo"
+  data-cobertura-map-markers={vistaAmpliada ? "true" : undefined}
+>
+  <div
+    class:list={[
+      "container cobertura__container",
+      { "cobertura__container--ampliado": vistaAmpliada },
+    ]}
+  >
+    <div class="cobertura__texto">
+      <header class="cobertura__header">
+        <p class="eyebrow">{vistaAmpliada ? "Mapa de cobertura" : "Ubicaciones"}</p>
+        <SectionTitle id="cobertura-titulo">{titulo}</SectionTitle>
+        {intro && <p class="cobertura__intro">{intro}</p>}
+      </header>
+
+      {
+        vistaAmpliada && (
+          <a class="cobertura__volver btn btn--secondary" href="/#cobertura">
+            Volver a Ubicaciones
+          </a>
+        )
+      }
+
+      {
+        interactionEnabled && (
+          <div class="cobertura__controles" data-cobertura-controls hidden>
+            <label class="cobertura__label" for="cobertura-selector">
+              Resaltar una ciudad
+            </label>
+            <select class="cobertura__selector" id="cobertura-selector" data-cobertura-selector>
+              <option value="">Elegir ciudad…</option>
+              {grupos.map((g) => (
+                <optgroup label={g.label}>
+                  {ciudadesDe(g).map((c) => (
+                    <option value={c.id}>{c.name}</option>
+                  ))}
+                </optgroup>
+              ))}
+            </select>
+            <p class="cobertura__seleccion" data-cobertura-status role="status">
+              {STATUS_INICIAL}
+            </p>
+          </div>
+        )
+      }
+
+      <ul class="cobertura__lista">
+        {
+          grupos.map((g) => {
+            const cs = ciudadesDe(g);
+            return (
+              <li class="cobertura__grupo" data-group-id={g.id}>
+                <h3 class="cobertura__grupo-label" id={`cobertura-grupo-${g.id}`}>
+                  {g.label} <span class="muted cobertura__grupo-count">· {cs.length}</span>
+                </h3>
+                <ul
+                  class="cobertura__ciudades"
+                  role="list"
+                  aria-labelledby={`cobertura-grupo-${g.id}`}
+                >
+                  {cs.map((c) => (
+                    <li
+                      class="cobertura__ciudad"
+                      id={`cobertura-ciudad-${c.id}`}
+                      data-city-id={c.id}
+                      data-group-id={g.id}
+                      data-group-label={g.label}
+                    >
+                      {c.name}
+                    </li>
+                  ))}
+                </ul>
+              </li>
+            );
+          })
+        }
+      </ul>
+    </div>
+
+    <aside class="cobertura__mapa" aria-labelledby="cobertura-mapa-titulo">
+      <p id="cobertura-mapa-titulo" class="cobertura__mapa-titulo">
+        Mapa de ciudades de referencia
+      </p>
+      <!--
+        Réplica inline de public/coverage-map.svg (Natural Earth,
+        dominio público). `aria-hidden`: la lista es la fuente de
+        verdad para lectores de pantalla.
+      -->
+      <svg
+        class="cobertura__diagrama"
+        viewBox={COLOMBIA_VIEWBOX}
+        role={vistaAmpliada ? "group" : undefined}
+        aria-labelledby={vistaAmpliada
+          ? "cobertura-svg-titulo cobertura-svg-descripcion"
+          : undefined}
+        aria-hidden={!vistaAmpliada ? "true" : undefined}
+        focusable="false"
+      >
+        <title id="cobertura-svg-titulo">
+          Mapa geográfico simplificado de Colombia — 13 ciudades de referencia
+        </title>
+        <desc id="cobertura-svg-descripcion">
+          Contorno Natural Earth (dominio público) de Colombia con 13 marcadores aproximados de
+          ciudades. Los marcadores son aproximados, no indican oficinas ni disponibilidad de
+          locales. La lista textual es la fuente de verdad.
+        </desc>
+        <defs>
+          <pattern id="cg" width="40" height="40" patternUnits="userSpaceOnUse">
+            <path
+              d="M 40 0 L 0 0 0 40"
+              fill="none"
+              stroke="#1D4ED8"
+              stroke-opacity="0.08"
+              stroke-width="1"></path>
+          </pattern>
+        </defs>
+        <rect
+          x="20"
+          y="20"
+          width="560"
+          height="680"
+          fill="#F4F6F9"
+          stroke="#0D2C54"
+          stroke-opacity="0.15"></rect>
+        <rect x="20" y="20" width="560" height="680" fill="url(#cg)"></rect>
+        <g fill="#1D4ED8" fill-opacity="0.08">
+          {
+            COLOMBIA_ZONE_WASHES.filter((w) => w.groupId !== "zona-norte-y-caribe").map((w) => (
+              <ellipse cx={w.cx} cy={w.cy} rx={w.rx} ry={w.ry} />
+            ))
+          }
+        </g>
+        {
+          COLOMBIA_ZONE_WASHES.filter((w) => w.groupId === "zona-norte-y-caribe").map((w) => (
+            <ellipse cx={w.cx} cy={w.cy} rx={w.rx} ry={w.ry} fill="#F0E9F5" />
+          ))
+        }
+        <path
+          d={COLOMBIA_OUTLINE_PATH}
+          fill="#FFFFFF"
+          stroke="#0D2C54"
+          stroke-width="2"
+          stroke-linejoin="round"></path>
+        <g fill="#FFFFFF" stroke="#0D2C54" stroke-width="1.6">
+          {
+            COLOMBIA_CITY_POINTS.map((p) => {
+              const city = ciudades.find((c) => c.id === p.id);
+              const group = city ? grupos.find((g) => g.id === city.groupId) : undefined;
+              return (
+                <circle
+                  class="cobertura-punto"
+                  data-city-id={p.id}
+                  cx={p.x}
+                  cy={p.y}
+                  r={p.r}
+                  aria-hidden={vistaAmpliada ? "true" : undefined}
+                >
+                  {vistaAmpliada && (
+                    <title>
+                      {city && group ? `${city.name} — ${group.label}` : (city?.name ?? p.id)}
+                    </title>
+                  )}
+                </circle>
+              );
+            })
+          }
+        </g>
+        {
+          COLOMBIA_MAP_LABELS.map((l) => (
+            <text x={l.x} y={l.y} font-size="10" fill="#4B5563">
+              {l.text}
+            </text>
+          ))
+        }
+        <text x="40" y="680" font-family="Manrope, sans-serif" font-size="11" fill="#4B5563">
+          Natural Earth (dominio público) · posiciones aproximadas
+        </text>
+      </svg>
+      {
+        !vistaAmpliada && (
+          <a class="cobertura__mapa-enlace" href="/mapa-de-cobertura/">
+            Ver mapa ampliado
+          </a>
+        )
+      }
+      <p class="cobertura__mapa-nota">
+        Mapa simplificado de Colombia. La lista textual es la fuente de verdad; los marcadores
+        muestran ubicaciones aproximadas de las ciudades listadas y no indican oficinas ni
+        disponibilidad de locales. Contorno: Natural Earth (dominio público).
+      </p>
+    </aside>
+  </div>
+</section>
+
+{
+  /* PA-08 / PA-17H — Mejora progresiva de cobertura (sin dependencias).
+Sólo se publica con `coverageInteraction` habilitado: el navegador descarga
+`/coverage-interaction.js` (local, diferido con `defer`: no bloquea la lectura)
+únicamente cuando este tag existe. El script convierte el texto de cada ciudad
+en un botón nativo al arrancar; sin JS la lista conserva texto visible.
+Sin querystring, sin red, sin terceros. Las reglas puras viven en
+src/lib/coverage-interaction.ts y se prueban en unit; este archivo es el pegamento
+DOM (probado en E2E). Comentario Astro: no llega al HTML (cero residuos en OFF). */
+}
+{interactionEnabled && <script src="/coverage-interaction.js" defer />}
+
+<style>
+  .cobertura__container {
+    display: grid;
+    grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+    gap: var(--space-7);
+    align-items: start;
+  }
+
+  .cobertura__container--ampliado {
+    grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+    grid-template-areas: "mapa texto";
+  }
+
+  .cobertura__container--ampliado .cobertura__texto {
+    grid-area: texto;
+  }
+
+  .cobertura__container--ampliado .cobertura__mapa {
+    grid-area: mapa;
+    padding: var(--space-5);
+  }
+
+  .cobertura__header {
+    max-width: 60ch;
+    margin-bottom: var(--space-6);
+  }
+
+  .cobertura__header h2 {
+    margin-top: var(--space-2);
+  }
+
+  .cobertura__intro {
+    margin-top: var(--space-3);
+    color: var(--color-muted);
+  }
+
+  .cobertura__controles {
+    display: grid;
+    gap: var(--space-2);
+    margin-bottom: var(--space-5);
+    max-width: 32rem;
+  }
+
+  .cobertura__controles[hidden] {
+    display: none;
+  }
+
+  .cobertura__volver {
+    display: inline-flex;
+    margin-bottom: var(--space-5);
+  }
+
+  .cobertura__label {
+    font-family: var(--font-display);
+    font-weight: var(--weight-display);
+    color: var(--color-ink);
+  }
+
+  .cobertura__selector {
+    font: inherit;
+    color: var(--color-ink);
+    background-color: var(--color-background);
+    border: 1px solid var(--color-ink);
+    border-radius: var(--radius-control);
+    padding: var(--space-2) var(--space-3);
+    max-width: 100%;
+  }
+
+  .cobertura__selector:focus-visible {
+    outline: 3px solid var(--color-focus-ring);
+    outline-offset: 2px;
+  }
+
+  .cobertura__seleccion {
+    margin: 0;
+    font-size: var(--fs-small);
+    color: var(--color-muted);
+    min-height: 1.5em;
+  }
+
+  .cobertura__lista {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: var(--space-5);
+  }
+
+  .cobertura__grupo {
+    border-left: 2px solid var(--color-action);
+    padding-left: var(--space-4);
+  }
+
+  .cobertura__grupo-label {
+    font-size: 1rem;
+    margin-bottom: var(--space-2);
+  }
+
+  .cobertura__grupo-count {
+    font-weight: var(--weight-body);
+    font-size: var(--fs-small);
+  }
+
+  .cobertura__ciudades {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+  }
+
+  .cobertura__ciudad {
+    display: inline-block;
+    padding: var(--space-1) var(--space-3);
+    background-color: var(--color-surface);
+    border-radius: var(--radius-pill);
+    font-size: var(--fs-small);
+    color: var(--color-ink);
+  }
+
+  /* Resaltado local de la ciudad elegida: blanco sobre ink (ratio
+     ~13.96, AAA); el botón nativo conserva foco visible al seleccionarse. */
+  .cobertura__ciudad--activa {
+    background-color: var(--color-ink);
+    color: #ffffff;
+    font-weight: var(--weight-body-strong);
+  }
+
+  :global(.cobertura__ciudad-boton) {
+    appearance: none;
+    border: 0;
+    border-radius: inherit;
+    padding: 0;
+    margin: 0;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    line-height: inherit;
+    text-align: left;
+    cursor: pointer;
+  }
+
+  :global(.cobertura__ciudad-boton:focus-visible) {
+    outline: 3px solid var(--color-focus-ring);
+    outline-offset: 2px;
+  }
+
+  :global(.cobertura-punto[data-cobertura-map-marker="true"]) {
+    cursor: pointer;
+  }
+
+  :global(.cobertura-punto[data-cobertura-map-marker="true"]:focus-visible) {
+    outline: 3px solid var(--color-focus-ring);
+    outline-offset: 3px;
+  }
+
+  .cobertura__mapa {
+    background-color: var(--color-surface);
+    padding: var(--space-4);
+    border-radius: var(--radius-card);
+  }
+
+  .cobertura__mapa-titulo {
+    font-family: var(--font-display);
+    font-weight: var(--weight-display);
+    color: var(--color-ink);
+    margin-bottom: var(--space-3);
+  }
+
+  .cobertura__diagrama {
+    width: 100%;
+    height: auto;
+    border-radius: var(--radius-card);
+  }
+
+  /* Punto resaltado: relleno de acción con aro ink (decorativo). */
+  .cobertura-punto--activo {
+    fill: var(--color-action);
+    stroke: var(--color-ink);
+    stroke-width: 2;
+  }
+
+  .cobertura__mapa-nota {
+    margin-top: var(--space-3);
+    font-size: var(--fs-caption);
+    color: var(--color-muted);
+  }
+
+  .cobertura__mapa-enlace {
+    display: inline-block;
+    margin-top: var(--space-3);
+  }
+
+  @media (max-width: 900px) {
+    .cobertura__container {
+      grid-template-columns: 1fr;
+    }
+
+    .cobertura__container--ampliado {
+      grid-template-columns: 1fr;
+      grid-template-areas: "texto" "mapa";
+    }
+  }
+</style>

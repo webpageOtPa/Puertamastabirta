@@ -1,0 +1,22 @@
+{
+  // Inventario de destinos de publicación — Puerta Abierta (PA-14).
+  // ------------------------------------------------------------------
+  // El candidato de release declara `destino` con uno de estos IDs;
+  // `release-verify` rechaza cualquier destino fuera del inventario
+  // (sin cambio arbitrario de destino). Estados según
+  // 05_INFRAESTRUCTURA/REGLAS_FREE.md.
+  //
+  // PENDIENTE_DE_APROBACION: nombre de emulación/preview. Al publicar,
+  // el propietario aprueba ID+digest+destino y el operador sustituye el
+  // nombre por uno disponible aprobado. Este archivo NO autoriza nada
+  // remoto ni registra dominio, cuenta o credencial alguna.
+  "sitio": "puerta-abierta",
+  "destinos": [
+    {
+      "id": "puerta-abierta-preview",
+      "descripcion": "Nombre de emulación y preparación (DESPLIEGUE.md); sustituible por nombre disponible aprobado al publicar.",
+      "estado": "PENDIENTE_DE_APROBACION",
+      "compatibility_date": "2026-09-17"
+    }
+  ]
+}

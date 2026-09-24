@@ -1,0 +1,135 @@
+/* fonts.css — Puerta Abierta (PA-04.A)                                 */
+/* -------------------------------------------------------------------- */
+/* Manrope (títulos/CTA) y Source Sans 3 (cuerpo) autoalojadas como     */
+/* WOFF2 locales en `/fonts/`. Sin CDN, sin Google Fonts, sin gstatic.  */
+/* Cada @font-face declara WOFF2 primero y `local(...)` como fallback.  */
+/* `font-display: swap` en todas.                                       */
+/*                                                                     */
+/* Cobertura real de archivos en `apps/puerta-abierta/public/fonts/`:   */
+/*   Manrope: 300, 400 (regular), 500 — estilo normal.                  */
+/*   Source Sans 3: 400 normal/italic, 500 normal/italic,                */
+/*     600 normal/italic, 300 italic.                                   */
+/* No existe `source-sans-3-300-normal.woff2` en el lote extraído, por  */
+/* lo que no se declara ese par peso/estilo (el navegador aplicará el  */
+/* @font-face más cercano o el fallback de `tokens.css`). Tampoco hay  */
+/* Manrope 600/700 en el lote: los pesos `--weight-display` (600) y    */
+/* `--weight-display-strong` (700) resuelven al WOFF2 disponible más    */
+/* próximo (500) o a síntesis del navegador. No se inventan URLs.       */
+/* -------------------------------------------------------------------- */
+
+/* --- Manrope -------------------------------------------------------- */
+
+@font-face {
+  font-family: "Manrope";
+  font-style: normal;
+  font-weight: 300;
+  font-display: swap;
+  src:
+    url("/fonts/manrope-v20-latin-300.woff2") format("woff2"),
+    local("Manrope-Light"),
+    local("Manrope Light");
+}
+
+@font-face {
+  font-family: "Manrope";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src:
+    url("/fonts/manrope-v20-latin-regular.woff2") format("woff2"),
+    local("Manrope-Regular"),
+    local("Manrope Regular");
+}
+
+@font-face {
+  font-family: "Manrope";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src:
+    url("/fonts/manrope-v20-latin-500.woff2") format("woff2"),
+    local("Manrope-Medium"),
+    local("Manrope Medium");
+}
+
+/* --- Source Sans 3 --------------------------------------------------- */
+
+@font-face {
+  font-family: "Source Sans 3";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src:
+    url("/fonts/source-sans-3-v19-latin-regular.woff2") format("woff2"),
+    local("Source Sans 3 Regular"),
+    local("SourceSans3-Regular"),
+    local("Source Sans Pro");
+}
+
+@font-face {
+  font-family: "Source Sans 3";
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src:
+    url("/fonts/source-sans-3-v19-latin-italic.woff2") format("woff2"),
+    local("Source Sans 3 Italic"),
+    local("SourceSans3-Italic"),
+    local("Source Sans Pro Italic");
+}
+
+@font-face {
+  font-family: "Source Sans 3";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src:
+    url("/fonts/source-sans-3-v19-latin-500.woff2") format("woff2"),
+    local("Source Sans 3 Medium"),
+    local("SourceSans3-Medium");
+}
+
+@font-face {
+  font-family: "Source Sans 3";
+  font-style: italic;
+  font-weight: 500;
+  font-display: swap;
+  src:
+    url("/fonts/source-sans-3-v19-latin-500italic.woff2") format("woff2"),
+    local("Source Sans 3 Medium Italic"),
+    local("SourceSans3-MediumItalic");
+}
+
+@font-face {
+  font-family: "Source Sans 3";
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src:
+    url("/fonts/source-sans-3-v19-latin-600.woff2") format("woff2"),
+    local("Source Sans 3 SemiBold"),
+    local("SourceSans3-SemiBold"),
+    local("Source Sans Pro Semibold");
+}
+
+@font-face {
+  font-family: "Source Sans 3";
+  font-style: italic;
+  font-weight: 600;
+  font-display: swap;
+  src:
+    url("/fonts/source-sans-3-v19-latin-600italic.woff2") format("woff2"),
+    local("Source Sans 3 SemiBold Italic"),
+    local("SourceSans3-SemiBoldItalic");
+}
+
+@font-face {
+  font-family: "Source Sans 3";
+  font-style: italic;
+  font-weight: 300;
+  font-display: swap;
+  src:
+    url("/fonts/source-sans-3-v19-latin-300italic.woff2") format("woff2"),
+    local("Source Sans 3 Light Italic"),
+    local("SourceSans3-LightItalic");
+}

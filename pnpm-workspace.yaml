@@ -1,0 +1,19 @@
+packages:
+  - "apps/*"
+
+# Astro 7 depende de esbuild; su binario nativo se compila en postinstall.
+# pnpm 11 sustituyó onlyBuiltDependencies/ignoredBuiltDependencies por el
+# mapa `allowBuilds`; la versión anterior es ignorada y la CI falla con
+# [ERR_PNPM_IGNORED_BUILDS]. Mantenemos únicamente esbuild aprobado (true);
+# el resto de paquetes del lockfile se resuelven sin postinstall.
+allowBuilds:
+  esbuild: true
+
+# Exclusión temporal: prettier@3.9.8 fue publicado el 2026-09-17,
+# el mismo día en que se generó el lockfile de PA-01. pnpm 11.26.0
+# aplica una política de edad mínima de release que bloquearía la
+# instalación con --frozen-lockfile hasta pasadas ~24 h. Esta exclusión
+# se eliminará cuando se actualice prettier a una versión más antigua
+# o la política deje de aplicar.
+minimumReleaseAgeExclude:
+  - prettier@3.9.8

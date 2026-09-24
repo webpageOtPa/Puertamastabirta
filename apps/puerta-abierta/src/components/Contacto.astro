@@ -1,0 +1,145 @@
+---
+// Contacto.astro — Panel de contacto directo por correo.
+// ---------------------------------------------------------------------
+// DISENO.md + INDEPENDENCIA_VISUAL.md (último párrafo): el bloque de
+// contacto NO contiene <form>, <input>, <textarea>, checkbox ni botón
+// "submit". Es un PANEL de dos zonas: explicación breve + canales.
+// Solo se muestra el correo aprobado y utilizable. Otros canales pueden
+// seguir deshabilitados en configuración, pero no aparecen en la página.
+//
+// Reserva visual: este componente es DISTINTO del panel de OTERCO
+// (que es "contacto editorial" + preparador local). Aquí NO copiamos
+// su silueta: usamos dos zonas apaisadas, fondo surface, radio 16px.
+
+import type { ContactChannel } from "../contracts/index.ts";
+import { channelHref } from "../lib/contact-links.ts";
+
+export interface Props {
+  titulo: string;
+  intro: string;
+  canales: ContactChannel[];
+}
+
+const { titulo, intro, canales } = Astro.props as Props;
+const visibleChannels = canales
+  .map((channel) => ({ channel, href: channelHref(channel) }))
+  .filter(({ channel, href }) => channel.kind === "email" && href !== null);
+---
+
+<section class="section section--surface" id="contacto" aria-labelledby="contacto-titulo">
+  <div class="container">
+    <div class="contacto">
+      <div class="contacto__panel contacto__panel--info">
+        <p class="eyebrow">Contacto</p>
+        <h2 id="contacto-titulo">{titulo}</h2>
+        <p class="contacto__intro">{intro}</p>
+        <a href="#hero-titulo" class="btn btn--secondary contacto__volver"> Volver al inicio </a>
+      </div>
+
+      <div class="contacto__panel contacto__panel--canales">
+        <h3 class="contacto__canales-titulo">Escríbenos</h3>
+        <ul class="contacto__canales" role="list">
+          {
+            visibleChannels.map(({ channel: ch, href }) => {
+              return (
+                <li class="canal" data-channel-id={ch.id} data-channel-kind={ch.kind}>
+                  <span class="canal__etiqueta">
+                    <span class="canal__label">{ch.label}</span>
+                  </span>
+                  <a class="canal__valor canal__valor--link" href={href!}>
+                    {ch.value}
+                  </a>
+                </li>
+              );
+            })
+          }
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .contacto {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr);
+    gap: var(--space-6);
+    background-color: var(--color-background);
+    border-radius: var(--radius-panel);
+    padding: var(--space-7);
+    box-shadow: var(--shadow-card);
+    border: 1px solid var(--color-border);
+  }
+
+  .contacto__panel--info h2 {
+    margin-top: var(--space-2);
+  }
+
+  .contacto__intro {
+    color: var(--color-muted);
+    margin-top: var(--space-4);
+  }
+
+  .contacto__volver {
+    margin-top: var(--space-5);
+  }
+
+  .contacto__canales-titulo {
+    font-family: var(--font-display);
+    font-weight: var(--weight-display);
+    color: var(--color-ink);
+    margin-bottom: var(--space-4);
+  }
+
+  .contacto__canales {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: var(--space-3);
+  }
+
+  .canal {
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "etiqueta"
+      "valor";
+    gap: var(--space-2);
+    padding: var(--space-3) var(--space-4);
+    background-color: var(--color-surface);
+    border-radius: var(--radius-card);
+  }
+
+  .canal__etiqueta {
+    grid-area: etiqueta;
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+  }
+
+  .canal__label {
+    font-weight: var(--weight-body-strong);
+    color: var(--color-ink);
+  }
+
+  .canal__valor {
+    grid-area: valor;
+    font-family: var(--font-mono);
+    font-size: var(--fs-small);
+    color: var(--color-text);
+    word-break: break-word;
+  }
+
+  .canal__valor--link {
+    text-decoration: underline;
+    color: var(--color-action);
+  }
+
+  @media (max-width: 900px) {
+    .contacto {
+      grid-template-columns: 1fr;
+      padding: var(--space-5);
+    }
+  }
+</style>

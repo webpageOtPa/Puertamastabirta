@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- hero-urban.svg — placeholder urbano de Puerta Abierta (PA-04).    -->
+<!-- Geometría controlada, NO usa fotografía. NO representa una ciudad  -->
+<!-- real ni una fachada identificable: es un diagrama de isotipo      -->
+<!-- urbano abstracto (líneas de fachada + vanos) sobre fondo azul.    -->
+<!-- El velo oscuro se aplica por CSS (fondo: variable hero-veil)    -->
+<!-- sobre el contenedor, no por SVG, para mantener el contraste        -->
+<!-- controlado por tokens.css.                                         -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 720" role="img" aria-labelledby="hero-urban-title">
+  <title id="hero-urban-title">Placeholder urbano de fachada — diagrama, no fotografía</title>
+  <defs>
+    <linearGradient id="cielo" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#0D2C54"/>
+      <stop offset="60%" stop-color="#163E78"/>
+      <stop offset="100%" stop-color="#1D4ED8"/>
+    </linearGradient>
+    <linearGradient id="fachada" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#102A4F"/>
+      <stop offset="100%" stop-color="#06182F"/>
+    </linearGradient>
+  </defs>
+  <!-- Cielo / fondo urbano -->
+  <rect width="1600" height="720" fill="url(#cielo)"/>
+  <!-- Edificios: bloques verticales, no representan ciudad real -->
+  <g fill="url(#fachada)">
+    <rect x="80"   y="280" width="180" height="440"/>
+    <rect x="280"  y="200" width="140" height="520"/>
+    <rect x="440"  y="320" width="220" height="400"/>
+    <rect x="680"  y="160" width="160" height="560"/>
+    <rect x="860"  y="240" width="200" height="480"/>
+    <rect x="1080" y="300" width="140" height="420"/>
+    <rect x="1240" y="220" width="180" height="500"/>
+    <rect x="1440" y="340" width="120" height="380"/>
+  </g>
+  <!-- Vanos: ventanas como rejilla regular (NO referencia a un local real) -->
+  <g fill="#1D4ED8" opacity="0.55">
+    <!-- bloque 1 -->
+    <rect x="100"  y="320" width="20" height="34"/>
+    <rect x="140"  y="320" width="20" height="34"/>
+    <rect x="180"  y="320" width="20" height="34"/>
+    <rect x="220"  y="320" width="20" height="34"/>
+    <rect x="100"  y="380" width="20" height="34"/>
+    <rect x="140"  y="380" width="20" height="34"/>
+    <rect x="180"  y="380" width="20" height="34"/>
+    <rect x="220"  y="380" width="20" height="34"/>
+    <rect x="100"  y="440" width="20" height="34"/>
+    <rect x="140"  y="440" width="20" height="34"/>
+    <rect x="180"  y="440" width="20" height="34"/>
+    <rect x="220"  y="440" width="20" height="34"/>
+    <rect x="100"  y="500" width="20" height="34"/>
+    <rect x="140"  y="500" width="20" height="34"/>
+    <rect x="180"  y="500" width="20" height="34"/>
+    <rect x="220"  y="500" width="20" height="34"/>
+    <rect x="100"  y="560" width="20" height="34"/>
+    <rect x="140"  y="560" width="20" height="34"/>
+    <rect x="180"  y="560" width="20" height="34"/>
+    <rect x="220"  y="560" width="20" height="34"/>
+    <rect x="100"  y="620" width="20" height="34"/>
+    <rect x="140"  y="620" width="20" height="34"/>
+    <rect x="180"  y="620" width="20" height="34"/>
+    <rect x="220"  y="620" width="20" height="34"/>
+    <!-- bloque 2 -->
+    <rect x="300" y="240" width="18" height="30"/>
+    <rect x="332" y="240" width="18" height="30"/>
+    <rect x="364" y="240" width="18" height="30"/>
+    <rect x="396" y="240" width="18" height="30"/>
+    <rect x="300" y="290" width="18" height="30"/>
+    <rect x="332" y="290" width="18" height="30"/>
+    <rect x="364" y="290" width="18" height="30"/>
+    <rect x="396" y="290" width="18" height="30"/>
+    <rect x="300" y="340" width="18" height="30"/>
+    <rect x="332" y="340" width="18" height="30"/>
+    <rect x="364" y="340" width="18" height="30"/>
+    <rect x="396" y="340" width="18" height="30"/>
+    <rect x="300" y="390" width="18" height="30"/>
+    <rect x="332" y="390" width="18" height="30"/>
+    <rect x="364" y="390" width="18" height="30"/>
+    <rect x="396" y="390" width="18" height="30"/>
+    <rect x="300" y="440" width="18" height="30"/>
+    <rect x="332" y="440" width="18" height="30"/>
+    <rect x="364" y="440" width="18" height="30"/>
+    <rect x="396" y="440" width="18" height="30"/>
+    <rect x="300" y="490" width="18" height="30"/>
+    <rect x="332" y="490" width="18" height="30"/>
+    <rect x="364" y="490" width="18" height="30"/>
+    <rect x="396" y="490" width="18" height="30"/>
+    <rect x="300" y="540" width="18" height="30"/>
+    <rect x="332" y="540" width="18" height="30"/>
+    <rect x="364" y="540" width="18" height="30"/>
+    <rect x="396" y="540" width="18" height="30"/>
+    <rect x="300" y="590" width="18" height="30"/>
+    <rect x="332" y="590" width="18" height="30"/>
+    <rect x="364" y="590" width="18" height="30"/>
+    <rect x="396" y="590" width="18" height="30"/>
+    <rect x="300" y="640" width="18" height="30"/>
+    <rect x="332" y="640" width="18" height="30"/>
+    <rect x="364" y="640" width="18" height="30"/>
+    <rect x="396" y="640" width="18" height="30"/>
+  </g>
+  <!-- Línea de horizonte sutil -->
+  <line x1="0" y1="560" x2="1600" y2="560" stroke="#1D4ED8" stroke-opacity="0.3" stroke-width="2"/>
+</svg>

@@ -1,0 +1,164 @@
+---
+// Footer.astro — Pie compacto y luminoso (PA-04, nota actualizada en PA-05,
+// refinado en PA-06).
+// ---------------------------------------------------------------------
+// DISENO.md + INDEPENDENCIA_VISUAL.md: pie breve y luminoso, con
+// identificación y contacto (sin página de privacidad: retirada
+// 2026-09-18, ver nota abajo). NO copia el cierre editorial verde de
+// OTERCO. Aquí se usan tres columnas simples (razón social, contacto,
+// legal) sobre fondo blanco; sin tipografía editorial, sin filetes.
+//
+// La identificación solo se muestra cuando se aporta una razón social
+// aprobada; los datos del certificado no se publican sin aprobación.
+// La nota final indica prototipo con contenido en revisión.
+//
+// Página /privacidad/ retirada por decisión del propietario (2026-09-18, acta del coordinador): el contacto se realiza por canales externos; la política de privacidad se revisará antes de comercial si el responsable la requiere. No rehacer sin instrucción expresa.
+
+import type { BuildProfile } from "../contracts/index.ts";
+
+export interface Props {
+  profile: BuildProfile;
+  marca?: string;
+  /** Texto aprobado por el propietario; omitir mientras no esté disponible. */
+  razonSocial?: string;
+  lugar?: string;
+  /**
+   * Base antepuesta al ancla de contacto (`""` en la portada; `"/"` en
+   * páginas auxiliares como la 404 para que `#contacto`
+   * resuelva a `/#contacto` en vez de quedar colgada sin destino).
+   */
+  anchorBase?: string;
+}
+
+const {
+  profile,
+  marca = "Puerta Abierta",
+  razonSocial,
+  lugar = "Colombia",
+  anchorBase = "",
+} = Astro.props as Props;
+const identidadAprobada = razonSocial?.trim();
+---
+
+<footer class="site-footer" role="contentinfo">
+  <div
+    class:list={[
+      "container",
+      "site-footer__inner",
+      { "site-footer__inner--with-identity": Boolean(identidadAprobada) },
+    ]}
+  >
+    <div class="site-footer__col site-footer__col--brand">
+      <a href="/" class="site-footer__brand-link" aria-label={`Ir a la portada de ${marca}`}>
+        <img
+          src="/images/logo-pa.png"
+          alt="Puerta Abierta — PA Real Estate"
+          class="site-footer__logo"
+          width="115"
+          height="76"
+          loading="lazy"
+          decoding="async"
+        />
+      </a>
+      <span class="site-footer__brand">{marca}</span>
+    </div>
+
+    {
+      identidadAprobada && (
+        <div class="site-footer__col">
+          <p class="site-footer__heading">Identificación</p>
+          <p>{identidadAprobada}</p>
+          <p class="muted">{lugar}</p>
+        </div>
+      )
+    }
+
+    <div class="site-footer__col">
+      <p class="site-footer__heading">Contacto</p>
+      <ul role="list" class="site-footer__list">
+        <li><a href={`${anchorBase}#contacto`}>Escríbenos</a></li>
+      </ul>
+    </div>
+
+    {
+      profile === "technical" && (
+        <p class="site-footer__nota muted">
+          Vista previa técnica en revisión. No habilitada para publicación.
+        </p>
+      )
+    }
+  </div>
+</footer>
+
+<style>
+  .site-footer {
+    background-color: var(--color-background);
+    border-top: 1px solid var(--color-border);
+    padding-block: var(--space-7);
+  }
+
+  .site-footer__inner {
+    display: grid;
+    grid-template-columns: 1.2fr 1fr;
+    gap: var(--space-6);
+    align-items: start;
+  }
+
+  .site-footer__inner--with-identity {
+    grid-template-columns: 1.2fr 1fr 1fr;
+  }
+
+  .site-footer__col--brand {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+  }
+
+  .site-footer__brand-link {
+    display: inline-flex;
+    align-items: center;
+    text-decoration: none;
+  }
+
+  .site-footer__logo {
+    display: block;
+    height: 36px;
+    width: auto;
+    max-width: 150px;
+    object-fit: contain;
+  }
+
+  .site-footer__brand {
+    font-family: var(--font-display);
+    font-weight: var(--weight-display-strong);
+    color: var(--color-ink);
+  }
+
+  .site-footer__heading {
+    font-family: var(--font-display);
+    font-weight: var(--weight-display);
+    color: var(--color-ink);
+    margin-bottom: var(--space-2);
+  }
+
+  .site-footer__list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: var(--space-1);
+  }
+
+  .site-footer__nota {
+    grid-column: 1 / -1;
+    margin-top: var(--space-5);
+    font-size: var(--fs-caption);
+    max-width: 70ch;
+  }
+
+  @media (max-width: 768px) {
+    .site-footer__inner {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

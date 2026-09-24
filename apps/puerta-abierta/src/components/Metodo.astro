@@ -1,0 +1,195 @@
+---
+// Metodo.astro — Cuatro elementos en grid (PA-04, refinado PA-07).
+// ---------------------------------------------------------------------
+// DISENO.md: cuatro elementos en grid/accordion semántico; elegir una
+// composición y DOCUMENTARLA. Decisión PA-07 (confirma PA-04): se
+// mantiene el GRID (4 columnas desktop → 2 en ≤1024px → 1 en ≤600px).
+// Alternativa descartada: acordeón <details>/<summary>. Motivos:
+//   1. La secuencia 1→2→3→4 debe leerse en orden también en móvil; el
+//      grid a una columna conserva el orden del DOM sin estado
+//      plegado/desplegado que oculte pasos.
+//   2. Los 4 cuerpos son breves (una frase); plegarlos añadiría
+//      interacción sin ganancia de lectura.
+//   3. Sin JS el grid funciona íntegro; el acordeón nativo también lo
+//      haría, pero duplicaría el marcado sin necesidad.
+// Semántica PA-07 (corregido tras revisión): <ol> con role="list"
+// explícito porque .metodo__grid usa list-style:none, y sin el role
+// Safari/VoiceOver puede perder la semántica de lista. Los números
+// visuales van con aria-hidden="true"; la posición la anuncia la
+// propia lista ordenada. Cada <li> agrupa número + <h3> + <p> en orden
+// del DOM, así la relación número→título→cuerpo es la del documento.
+// Jerarquía: el <h3> cuelga del <h2> de la sección (verificado).
+
+export interface Paso {
+  numero: number;
+  titulo: string;
+  cuerpo: string;
+}
+
+export interface Ilustracion {
+  src: string;
+  srcset: string;
+  sizes: string;
+  alt: string;
+  caption: string;
+  width: number;
+  height: number;
+  ampliaHref: string;
+  ampliaLabel: string;
+}
+
+export interface Props {
+  titulo: string;
+  intro?: string;
+  pasos: Paso[];
+  ilustracion: Ilustracion;
+}
+
+const { titulo, intro, pasos, ilustracion } = Astro.props as Props;
+---
+
+<section class="section" id="metodo" aria-labelledby="metodo-titulo">
+  <div class="container">
+    <header class="metodo__header">
+      <p class="eyebrow">Método</p>
+      <h2 id="metodo-titulo">{titulo}</h2>
+      {intro && <p class="metodo__intro">{intro}</p>}
+    </header>
+
+    {
+      /*
+      PA-17B: ilustración conceptual de locales comerciales (figura de
+      contenido, no identidad: el logo de cabecera no cambia). Derivados
+      WebP pregenerados en public/images/ + srcset manual (sin
+      astro:assets/sharp, misma convención que logo-pa.png). El enlace de
+      ampliación es un <a> simple al PNG, sin JS ni página intermedia.
+    */
+    }
+    <figure class="metodo__ilustracion">
+      <picture>
+        <source type="image/webp" srcset={ilustracion.srcset} sizes={ilustracion.sizes} />
+        <img
+          src={ilustracion.src}
+          alt={ilustracion.alt}
+          width={ilustracion.width}
+          height={ilustracion.height}
+          loading="lazy"
+          decoding="async"
+        />
+      </picture>
+      <figcaption class="metodo__ilustracion-pie">
+        {ilustracion.caption}{" "}
+        <a
+          class="metodo__ilustracion-amplia"
+          href={ilustracion.ampliaHref}
+          target="_blank"
+          rel="noopener"
+        >
+          {ilustracion.ampliaLabel}
+        </a>
+      </figcaption>
+    </figure>
+
+    <ol class="metodo__grid" role="list">
+      {
+        pasos.map((p) => (
+          <li class="paso">
+            <span class="paso__numero" aria-hidden="true">
+              {String(p.numero).padStart(2, "0")}
+            </span>
+            <h3 class="paso__titulo">{p.titulo}</h3>
+            <p class="paso__cuerpo">{p.cuerpo}</p>
+          </li>
+        ))
+      }
+    </ol>
+  </div>
+</section>
+
+<style>
+  .metodo__header {
+    margin-bottom: var(--space-7);
+    max-width: 60ch;
+  }
+
+  .metodo__header h2 {
+    margin-top: var(--space-2);
+  }
+
+  .metodo__intro {
+    margin-top: var(--space-4);
+    color: var(--color-muted);
+  }
+
+  /* PA-17B: figura a ancho de contenedor, sin marco pesado ni sombras. */
+  .metodo__ilustracion {
+    margin: var(--space-6) 0 var(--space-7);
+  }
+
+  .metodo__ilustracion picture,
+  .metodo__ilustracion img {
+    display: block;
+    max-width: 100%;
+  }
+
+  .metodo__ilustracion img {
+    height: auto;
+    border-radius: var(--radius-card);
+  }
+
+  .metodo__ilustracion-pie {
+    margin-top: var(--space-3);
+    color: var(--color-muted);
+    font-size: 0.875rem;
+  }
+
+  .metodo__ilustracion-amplia {
+    color: var(--color-action);
+  }
+
+  .metodo__grid {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: var(--space-5);
+  }
+
+  .paso {
+    border-top: 2px solid var(--color-ink);
+    padding-top: var(--space-4);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+  }
+
+  .paso__numero {
+    font-family: var(--font-display);
+    font-weight: var(--weight-display-strong);
+    font-size: 1.5rem;
+    color: var(--color-action);
+    letter-spacing: -0.02em;
+  }
+
+  .paso__titulo {
+    font-size: 1.0625rem;
+  }
+
+  .paso__cuerpo {
+    color: var(--color-muted);
+    font-size: 0.9375rem;
+  }
+
+  @media (max-width: 1024px) {
+    .metodo__grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (max-width: 600px) {
+    .metodo__grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

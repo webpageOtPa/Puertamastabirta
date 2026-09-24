@@ -1,0 +1,82 @@
+---
+// Página 404 — Puerta Abierta (PA-10)
+// ---------------------------------------------------------------------------
+// `src/pages/404.astro` → `dist/404.html`. Sin redirección masiva 200
+// tipo SPA: la 404 es un 404 real.
+//   - `astro dev`: sirve esta página con estado 404.
+//   - `astro preview`: sirve `dist/404.html` con estado 404.
+//   - Tests E2E (`scripts/serve-dist.mjs`): ante una ruta inexistente
+//     sirve `dist/404.html` con estado 404 (ver §404 del script).
+// Estética propia del sitio (cabecera + pie + botón secundario) y
+// enlace de vuelta al inicio. Sin formularios ni recursos externos.
+
+import { loadSiteConfig } from "../config/index.js";
+import { resolveBuildProfile, resolveSeoMeta } from "../lib/seo.js";
+import Base from "../layouts/Base.astro";
+import Header from "../components/Header.astro";
+import Footer from "../components/Footer.astro";
+
+const loaded = loadSiteConfig(resolveBuildProfile());
+if (!loaded.ok) {
+  throw new Error(
+    `[404.astro] Configuración inválida:\n` + loaded.errors.map((e) => `  - ${e}`).join("\n"),
+  );
+}
+const cfg = loaded.config;
+
+const seo = resolveSeoMeta({
+  profile: cfg.profile,
+  site: cfg.site,
+  title: `Página no encontrada — ${cfg.site.nombrePublico}`,
+  description:
+    "La página solicitada no existe en Puerta Abierta. Vuelve al inicio para seguir explorando el sitio.",
+});
+---
+
+<Base
+  title={seo.title}
+  description={seo.description}
+  lang={seo.lang}
+  noindex={true}
+  techPreview={cfg.profile === "technical"}
+  canonical={null}
+  ogUrl={null}
+  siteName={seo.siteName}
+>
+  <Header brand={cfg.site.nombrePublico} anchorBase="/" />
+
+  <main id="main" tabindex="-1">
+    <div class="section">
+      <div class="container error404">
+        <p class="eyebrow">Error 404</p>
+        <h1 id="error404-titulo">Esta página no existe</h1>
+        <p class="error404__texto">
+          La dirección solicitada no corresponde a ninguna página de Puerta Abierta. Es posible que
+          el enlace esté incompleto o que la página haya cambiado de lugar.
+        </p>
+        <p>
+          <a href="/" class="btn btn--primary">Volver al inicio</a>
+        </p>
+      </div>
+    </div>
+  </main>
+
+  <Footer marca={cfg.site.nombrePublico} profile={cfg.profile} anchorBase="/" />
+</Base>
+
+<style>
+  /* PA-10 — La 404 reutiliza la estética del sitio (tokens y botones
+     globales); aquí sólo la medida de lectura y el ritmo vertical. */
+  .error404 {
+    max-width: var(--measure-text);
+  }
+
+  .error404__texto {
+    color: var(--color-muted);
+    margin-top: var(--space-4);
+  }
+
+  .error404 p:last-child {
+    margin-top: var(--space-6);
+  }
+</style>

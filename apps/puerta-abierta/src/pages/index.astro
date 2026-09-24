@@ -1,0 +1,82 @@
+---
+// Portada estática. El contenido editorial vive separado de los componentes.
+import { loadSiteConfig } from "../config/index.js";
+import { resolveBuildProfile, resolveSeoMeta } from "../lib/seo.js";
+import { HOME_CONTENT, METODO_ILUSTRACION } from "../data/home-content.js";
+import Base from "../layouts/Base.astro";
+import Header from "../components/Header.astro";
+import Hero from "../components/Hero.astro";
+import Ventajas from "../components/Ventajas.astro";
+import Metodo from "../components/Metodo.astro";
+import Flujograma from "../components/Flujograma.astro";
+import Cobertura from "../components/Cobertura.astro";
+import Contacto from "../components/Contacto.astro";
+import Footer from "../components/Footer.astro";
+
+const buildMode = import.meta.env.MODE;
+const loaded = loadSiteConfig(resolveBuildProfile());
+if (!loaded.ok) {
+  throw new Error(
+    `[index.astro] Configuración inválida para build="${buildMode}":\n` +
+      loaded.errors.map((e) => `  - ${e}`).join("\n"),
+  );
+}
+const cfg = loaded.config;
+const isTechnical = cfg.profile === "technical";
+const seo = resolveSeoMeta({
+  profile: cfg.profile,
+  site: cfg.site,
+  title: `${cfg.site.nombrePublico} — ${HOME_CONTENT.seo.title}${isTechnical ? " — Vista previa" : ""}`,
+  description: `${isTechnical ? "Vista previa técnica en revisión. " : ""}${HOME_CONTENT.seo.description}`,
+});
+---
+
+<Base
+  title={seo.title}
+  description={seo.description}
+  lang={seo.lang}
+  noindex={seo.noindex}
+  techPreview={isTechnical}
+  canonical={seo.canonical}
+  ogUrl={seo.ogUrl}
+  siteName={seo.siteName}
+>
+  <Header brand={cfg.site.nombrePublico} />
+
+  <main id="main" tabindex="-1">
+    <Hero
+      eyebrow={HOME_CONTENT.hero.eyebrow}
+      titulo={HOME_CONTENT.hero.titulo}
+      subtitulo={HOME_CONTENT.hero.subtitulo}
+      ctaPrimario={HOME_CONTENT.hero.ctaPrimario}
+      ctaSecundario={HOME_CONTENT.hero.ctaSecundario}
+    />
+
+    <Ventajas titulo={HOME_CONTENT.ventajas.titulo} items={HOME_CONTENT.ventajas.items} />
+
+    <Metodo
+      titulo={HOME_CONTENT.metodo.titulo}
+      intro={HOME_CONTENT.metodo.intro}
+      pasos={HOME_CONTENT.metodo.pasos}
+      ilustracion={METODO_ILUSTRACION}
+    />
+
+    <Flujograma />
+
+    <Cobertura
+      titulo={HOME_CONTENT.cobertura.titulo}
+      intro={HOME_CONTENT.cobertura.intro}
+      grupos={cfg.groups}
+      ciudades={cfg.cities}
+      interactionEnabled={cfg.features.coverageInteraction}
+    />
+
+    <Contacto
+      titulo={HOME_CONTENT.contacto.titulo}
+      intro={HOME_CONTENT.contacto.intro[cfg.profile]}
+      canales={cfg.channels}
+    />
+  </main>
+
+  <Footer marca={cfg.site.nombrePublico} profile={cfg.profile} />
+</Base>

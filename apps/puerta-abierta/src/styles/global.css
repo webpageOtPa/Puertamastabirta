@@ -1,0 +1,300 @@
+/* global.css — Puerta Abierta (PA-04)                                 */
+/* -------------------------------------------------------------------- */
+/* Reset mínimo, tipografía base y utilidades.                          */
+/* Se compone con tokens.css y fonts.css (que se importan antes en el */
+/* layout). Diseñado sin CDN; todo el CSS es local y versionado.      */
+/* -------------------------------------------------------------------- */
+
+/* --- Reset mínimo -------------------------------------------------- */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  /* PA-04.E: la cabecera es sticky; este relleno evita que los anclajes
+     (#contacto, #comparativa, etc.) y el foco de teclado queden tapados
+     por ella al desplazar. Altura de cabecera + 1rem de margen. */
+  scroll-padding-top: calc(var(--header-height, 4.5rem) + 1rem);
+}
+
+/* En móvil la cabecera cerrada es una sola fila compacta (≈70px;
+   PA-04.G); se reserva 6rem (96px) para que los anclajes no queden
+   tapados tampoco en 390/320px. */
+@media (max-width: 768px) {
+  html {
+    scroll-padding-top: 6rem;
+  }
+
+  /* PA-04.E/D1: con el menú móvil abierto la cabecera crece (≈280px
+     en 390px de viewport: fila compacta + menú desplegado); se eleva
+     el relleno de anclaje para que el destino no quede tapado por la
+     cabecera expandida (DISENO.md: "sticky solo si no tapa foco ni
+     destino"). 25rem = 400px deja margen seguro. Con el menú cerrado
+     se mantiene 6rem. */
+  html:has(.site-header__nav-details[open]) {
+    scroll-padding-top: 25rem;
+  }
+}
+
+body,
+h1,
+h2,
+h3,
+h4,
+p,
+figure,
+blockquote,
+dl,
+dd,
+ul,
+ol {
+  margin: 0;
+}
+
+ul[role="list"],
+ul.bare {
+  list-style: none;
+  padding: 0;
+}
+
+img,
+picture,
+svg,
+video {
+  max-width: 100%;
+  display: block;
+  height: auto;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+
+/* --- Tipografía base ---------------------------------------------- */
+html {
+  font-family: var(--font-body);
+  font-size: 100%;
+  color: var(--color-text);
+  background-color: var(--color-background);
+  line-height: var(--lh-body);
+}
+
+body {
+  min-height: 100vh;
+  font-size: var(--fs-body);
+  font-weight: var(--weight-body);
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--font-display);
+  color: var(--color-ink);
+  line-height: var(--lh-display);
+  font-weight: var(--weight-display-strong);
+  letter-spacing: -0.01em;
+  /* Evitar que la cabecera se rompa en una línea ilegible */
+  text-wrap: balance;
+}
+
+h1 {
+  font-size: var(--fs-h1);
+}
+
+h2 {
+  font-size: var(--fs-h2);
+  line-height: var(--lh-heading);
+  font-weight: var(--weight-display);
+}
+
+h3 {
+  font-size: var(--fs-h3);
+  line-height: var(--lh-heading);
+  font-weight: var(--weight-display);
+}
+
+p {
+  max-width: var(--measure-text);
+}
+
+a {
+  color: var(--color-ink);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.2em;
+  transition: color var(--motion-fast) var(--easing-standard);
+}
+
+a:hover {
+  color: var(--color-action);
+}
+
+a:focus-visible,
+button:focus-visible,
+[role="button"]:focus-visible {
+  outline: none;
+  box-shadow: var(--shadow-focus);
+  border-radius: var(--radius-control);
+}
+
+/* --- Utilidades estructurales ------------------------------------- */
+.container {
+  width: 100%;
+  max-width: var(--container-max);
+  margin-inline: auto;
+  padding-inline: var(--container-pad-x);
+}
+
+.section {
+  padding-block: var(--section-y-mobile);
+}
+
+@media (min-width: 769px) {
+  .section {
+    padding-block: var(--section-y-desktop);
+  }
+}
+
+.section--surface {
+  background-color: var(--color-surface);
+}
+
+.section--lavender {
+  background-color: var(--color-lavender);
+}
+
+.stack > * + * {
+  margin-top: var(--space-5);
+}
+
+.cluster {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  align-items: center;
+}
+
+.eyebrow {
+  font-family: var(--font-display);
+  font-weight: var(--weight-display);
+  font-size: var(--fs-caption);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+}
+
+.muted {
+  color: var(--color-muted);
+}
+
+/* PA-10 — Aviso discreto de preview técnico (señal visible del noindex
+   en Base.astro). Sólo tokens existentes (par ink sobre surface, par ya
+   medido en contrast:strict). No promete recepción ni resultados. */
+.tech-preview {
+  max-width: none;
+  margin: 0;
+  padding: var(--space-2) var(--space-4);
+  background-color: var(--color-surface);
+  color: var(--color-ink);
+  border-bottom: 1px solid var(--color-border);
+  font-size: var(--fs-caption);
+  text-align: center;
+}
+
+.divider {
+  border: 0;
+  border-top: 1px solid var(--color-border);
+  margin-block: var(--space-6);
+}
+
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-ink);
+  color: var(--color-ink-on-action);
+  border-radius: var(--radius-control);
+  text-decoration: none;
+  z-index: 100;
+}
+
+.skip-link:focus {
+  left: var(--space-3);
+  top: var(--space-3);
+}
+
+/* PA-05: el `<main>` es destino del skip-link con `tabindex="-1"`.
+   Al recibir el foco por el salto no se dibuja un recuadro sobre todo
+   el contenido; los elementos interactivos conservan su foco visible. */
+#main:focus {
+  outline: none;
+}
+
+/* --- Botones ------------------------------------------------------ */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-5);
+  border-radius: var(--radius-control);
+  font-family: var(--font-display);
+  font-weight: var(--weight-display);
+  font-size: 1rem;
+  line-height: 1.2;
+  text-decoration: none;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition:
+    background-color var(--motion-base) var(--easing-standard),
+    color var(--motion-base) var(--easing-standard),
+    border-color var(--motion-base) var(--easing-standard),
+    transform var(--motion-fast) var(--easing-standard);
+}
+
+.btn--primary {
+  background-color: var(--color-action);
+  color: var(--color-ink-on-action);
+}
+
+.btn--primary:hover {
+  background-color: #1741b3;
+  color: var(--color-ink-on-action);
+}
+
+.btn--secondary {
+  background-color: transparent;
+  color: var(--color-ink);
+  border-color: var(--color-ink);
+}
+
+.btn--secondary:hover {
+  background-color: var(--color-ink);
+  color: var(--color-ink-on-action);
+}
+
+.btn:active {
+  transform: translateY(1px);
+}
+
+/* --- Reduced motion ---------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}

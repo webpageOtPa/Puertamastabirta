@@ -1,0 +1,63 @@
+# --- Sistema y herramientas -------------------------------------------
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# --- Node / pnpm --------------------------------------------------
+node_modules/
+.pnpm-store/
+.pnpm-debug.log*
+
+# --- Astro build --------------------------------------------------
+# Salida estática real de la web Puerta Abierta.
+apps/puerta-abierta/dist/
+apps/puerta-abierta/.astro/
+# Copia generada del script de cobertura (PA-08): la fuente versionada
+# vive en apps/puerta-abierta/src/scripts/ y
+# scripts/sync-coverage-script.mjs la publica aquí sólo con el flag
+# coverageInteraction habilitado.
+apps/puerta-abierta/public/coverage-interaction.js
+
+# --- Pruebas (Playwright, Vitest) ---------------------------------
+test-results/
+playwright-report/
+playwright/.cache/
+coverage/
+tests/.tmp/
+
+# --- Wrangler / Cloudflare ----------------------------------------
+.wrangler/
+.dev.vars
+.dev.vars.*
+
+# --- OpenCode (no publicable, tampoco es política --------------------------------
+.opencode/
+
+# --- Releases locales (no publicable automáticamente) -------------
+releases/
+
+# --- Referencias privadas -----------------------------------------
+.private-references/
+
+# --- Logs ---------------------------------------------------------
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# --- Variables de entorno ----------------------------------------
+*.env
+*.env.*
+!.env.example
+
+# --- Lockfiles locales que no se versionan -------------------------
+# pnpm-lock.yaml SÍ se versiona; este patrón está vacío a propósito.
+
+# --- Copia limpia temporal para verificar instalación repetible ----
+# Generada y borrada por PA-01 dentro del root del proyecto.
+.pa01-clean/
+
+/.private-config-backup/

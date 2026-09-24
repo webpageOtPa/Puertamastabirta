@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- compass.svg — isotipo técnico "expansión y decisión" para ventajas. -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" role="img" aria-labelledby="compass-title">
+  <title id="compass-title">Decisión de expansión</title>
+  <g fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="24" cy="24" r="17"/>
+    <polygon points="24,12 28,24 24,36 20,24" fill="currentColor"/>
+    <line x1="24" y1="4"  x2="24" y2="10"/>
+    <line x1="24" y1="38" x2="24" y2="44"/>
+    <line x1="4"  y1="24" x2="10" y2="24"/>
+    <line x1="38" y1="24" x2="44" y2="24"/>
+  </g>
+</svg>

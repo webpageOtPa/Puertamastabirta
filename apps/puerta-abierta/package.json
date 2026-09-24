@@ -1,0 +1,23 @@
+{
+  "name": "@puerta-abierta/app",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Aplicación Astro estática de Puerta Abierta. Sin backend, sin formularios receptores.",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "build:test": "astro build --outDir dist",
+    "preview": "astro preview",
+    "check": "astro check",
+    "astro": "astro"
+  },
+  "dependencies": {
+    "astro": "7.3.3",
+    "zod": "4.6.5"
+  },
+  "devDependencies": {
+    "@astrojs/check": "0.9.10",
+    "typescript": "5.9.3"
+  }
+}

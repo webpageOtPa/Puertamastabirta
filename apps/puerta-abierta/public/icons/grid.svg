@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- grid.svg — isotipo técnico "cobertura urbana" para ventajas. -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" role="img" aria-labelledby="grid-title">
+  <title id="grid-title">Cuadrícula urbana</title>
+  <g fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="square" stroke-linejoin="miter">
+    <rect x="6" y="6" width="36" height="36"/>
+    <line x1="6" y1="18" x2="42" y2="18"/>
+    <line x1="6" y1="30" x2="42" y2="30"/>
+    <line x1="18" y1="6" x2="18" y2="42"/>
+    <line x1="30" y1="6" x2="30" y2="42"/>
+  </g>
+  <circle cx="30" cy="30" r="3.4" fill="currentColor"/>
+</svg>

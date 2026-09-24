@@ -1,0 +1,88 @@
+name: ci
+
+# PA-14 — Validación de ramas sin secretos.
+# ---------------------------------------------------------------------------
+# Replica en CI las mismas 8 puertas locales de `pnpm run verify`, en orden,
+# sin credenciales y sin publicar (build:test va antes de test/check:static
+# porque el scanner y los unit tests que lo invocan necesitan dist):
+#   validate:config → check → build:test → test → check:static
+#   → contrast:strict → budget:report (--use-dist) → e2e (Playwright, sin rebuild)
+#
+# Higiene REGLAS_FREE: runner Linux estándar, una sola cadena automática
+# (no activar Workers Builds ni segundo autodeploy), `concurrency` que
+# cancela corridas obsoletas por rama, retención corta de artefactos
+# (7 días) y sólo `pull_request` (nunca `pull_request_target` con código
+# no confiable). Instalación con lockfile congelado.
+# Acciones fijadas a major revisada (@v4); el fijado por SHA queda
+# pendiente (sin red para resolverlo) — ver docs/implementacion/PA-14.
+# Si se agota la cuota de Actions: pausar, no contratar ni degradar
+# seguridad; la contingencia es `pnpm run verify` en local (PA-Q060).
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 11.26.0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .node-version
+
+      - name: Install (frozen lockfile)
+        run: pnpm install --frozen-lockfile
+
+      - name: Puerta 1/8 — validate:config
+        run: pnpm run validate:config
+
+      - name: Puerta 2/8 — check (astro, tsc, eslint, prettier)
+        run: pnpm run check
+
+      - name: Puerta 3/8 — build:test
+        run: pnpm run build:test
+
+      - name: Puerta 4/8 — unit tests
+        run: pnpm test
+
+      - name: Puerta 5/8 — check:static
+        run: pnpm run check:static
+
+      - name: Puerta 6/8 — contrast:strict
+        run: pnpm run contrast:strict
+
+      - name: Install Playwright browsers (navegadores para las mediciones Playwright del budget y el e2e)
+        run: pnpm exec playwright install chromium
+
+      - name: Puerta 7/8 — budget:report (sobre dist recién construido)
+        run: pnpm run budget:report -- --use-dist
+
+      - name: Puerta 8/8 — e2e (sin rebuild; dist ya construido en 3/8)
+        run: pnpm run test:e2e:playwright
+
+      - name: Upload dist
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist-pa01
+          path: apps/puerta-abierta/dist
+          if-no-files-found: error
+          retention-days: 7

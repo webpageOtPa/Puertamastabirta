@@ -1,0 +1,15 @@
+{
+  // Puerta Abierta — configuración de EMULACIÓN y preparación (PA-11).
+  // Esquema según 05_INFRAESTRUCTURA/DESPLIEGUE.md: sólo name,
+  // compatibility_date y assets. Sin main, sin assets.binding, sin
+  // run_worker_first, sin secretos, sin bases de datos, sin rutas API,
+  // sin functions ni cron. El nombre es un preview sustituible por uno
+  // disponible aprobado al publicar; este archivo NO autoriza nada remoto.
+  "name": "puerta-abierta-preview",
+  "compatibility_date": "2026-09-17",
+  "assets": {
+    "directory": "./dist",
+    "not_found_handling": "404-page",
+    "html_handling": "auto-trailing-slash",
+  },
+}
